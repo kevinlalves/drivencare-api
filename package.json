@@ -3,9 +3,18 @@
   "version": "1.0.0",
   "description": "Plataforma de agendamento de consultas médicas que permita que os pacientes agendem consultas com médicos de diferentes especialidades, escolhendo a data e horário disponíveis para cada médico. Os médicos poderão visualizar as consultas agendadas e confirmar ou cancelar cada uma delas. A plataforma também permitirá que os pacientes e médicos visualizem um histórico das consultas agendadas e realizadas.",
   "main": "src/app.js",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon src/app.js",
-    "test": "jest"
+    "start": "NODE_ENV=production node dist/app.js",
+    "dev": "NODE_ENV=development nodemon src/app.ts",
+    "build": "rm -rf dist && tsc",
+    "migrate": "NODE_ENV=development node dist/config/framework/migrate.js",
+    "rollback": "NODE_ENV=development node dist/config/framework/rollback.js",
+    "create:migration": "NODE_ENV=development node dist/config/framework/createMigration.js",
+    "delete:migration": "NODE_ENV=development node dist/config/framework/deleteMigration.js",
+    "test": "jest",
+    "lint": "npx prettier --loglevel error --write src && npx eslint src/**/*.ts",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -24,11 +33,33 @@
   },
   "homepage": "https://github.com/kevinlalves/projeto19-drivencare#readme",
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "@types/cookie-parser": "^1.4.3",
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.1",
+    "@types/pg": "^8.6.6",
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
+    "eslint": "^8.37.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.8.0",
+    "husky": "^8.0.3",
+    "nodemon": "^2.0.22",
+    "prettier": "^2.8.7",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
   },
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "chalk": "^5.2.0",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-async-errors": "^3.1.1",
+    "jsonwebtoken": "^9.0.0",
+    "pg": "^8.10.0",
+    "string-strip-html": "^13.2.1",
+    "zod": "^3.21.4"
   }
 }
