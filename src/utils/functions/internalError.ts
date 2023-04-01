@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { ErrnoException } from '../../types/error.js';
+import { ErrnoException } from '../../types/Error.js';
 
 const internalError = (error: ErrnoException, res: Response): void => {
   console.log(error);

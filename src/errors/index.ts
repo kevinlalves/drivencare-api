@@ -12,4 +12,18 @@ const unauthorizedError = () => {
   };
 };
 
-export default { unprocessableEntityError, unauthorizedError };
+const invalidCredentialsError = () => {
+  return {
+    name: 'InvalidCredentialsError',
+    message: 'Invalid email and/or password',
+  };
+};
+
+const conflictError = (message: string) => {
+  return {
+    name: 'ConflictError',
+    message,
+  };
+};
+
+export default { unprocessableEntityError, unauthorizedError, invalidCredentialsError, conflictError };

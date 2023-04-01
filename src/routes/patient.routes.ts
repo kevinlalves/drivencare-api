@@ -2,7 +2,6 @@ import { Router } from 'express';
 
 const patientRoutes = Router();
 
-patientRoutes.post('/signup');
-patientRoutes.post('/signin');
+patientRoutes.post('/sign-up');
 
 export default patientRoutes;

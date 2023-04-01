@@ -1,5 +1,5 @@
 import { stripHtml } from 'string-strip-html';
-import { GenericObject } from '../../types/object.js';
+import { GenericObject } from '../../types/Object.js';
 
 const sanitizeObject = (object: GenericObject) => {
   for (const key of Object.keys(object)) {
