@@ -5,6 +5,6 @@ import usersController from '../controllers/users.controller.js';
 
 const userRoutes = Router();
 
-userRoutes.post('/sign-in', validateSchemaMiddleware(userSchemas.signIn), usersController.signIn);
+userRoutes.post('/sign_in', validateSchemaMiddleware(userSchemas.signIn), usersController.signIn);
 
 export default userRoutes;

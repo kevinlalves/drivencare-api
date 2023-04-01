@@ -1,22 +1,31 @@
 import db from '../config/database/connection.js';
 import { QueryResult } from 'pg';
 import UserRole from '../types/UserRole.js';
+import { z } from 'zod';
+import userRoleSchemas from '../schemas/userRole.schemas.js';
 
-const findByName = (name: string): Promise<QueryResult<UserRole>> =>
+const findAll = (): Promise<QueryResult<UserRole>> =>
   db.query(
     `
-      SELECT * FROM user_roles WHERE name = $1;
-    `,
-    [name]
+      SELECT * FROM user_roles;
+    `
   );
 
-const create = (name: string) =>
+const findBySlug = ({ slug }: z.infer<typeof userRoleSchemas.findBySlug>): Promise<QueryResult<UserRole>> =>
   db.query(
     `
-      INSERT INTO user_roles (name)
-      VALUES ($1);
+      SELECT * FROM user_roles WHERE slug = $1;
     `,
-    [name]
+    [slug]
   );
 
-export default { findByName, create };
+const create = ({ name, slug }: z.infer<typeof userRoleSchemas.create>) =>
+  db.query(
+    `
+      INSERT INTO user_roles (name, slug)
+      VALUES ($1, $2);
+    `,
+    [name, slug]
+  );
+
+export default { findAll, findBySlug, create };

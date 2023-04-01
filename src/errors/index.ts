@@ -26,4 +26,11 @@ const conflictError = (message: string) => {
   };
 };
 
-export default { unprocessableEntityError, unauthorizedError, invalidCredentialsError, conflictError };
+const notFoundError = (message: string) => {
+  return {
+    name: 'NotFoundError',
+    message,
+  };
+};
+
+export default { unprocessableEntityError, unauthorizedError, invalidCredentialsError, conflictError, notFoundError };

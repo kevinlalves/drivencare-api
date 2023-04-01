@@ -5,6 +5,6 @@ import doctorsController from '../controllers/doctors.controller.js';
 
 const doctorRoutes = Router();
 
-doctorRoutes.post('/sign-up', validateSchemaMiddleware(doctorSchemas.signUp), doctorsController.singUp);
+doctorRoutes.post('/sign_up', validateSchemaMiddleware(doctorSchemas.signUp), doctorsController.singUp);
 
 export default doctorRoutes;

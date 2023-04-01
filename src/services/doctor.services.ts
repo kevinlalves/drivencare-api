@@ -4,6 +4,7 @@ import usersRepository from '../repositories/users.repository.js';
 import errors from '../errors/index.js';
 import doctorsRepository from '../repositories/doctors.repository.js';
 import userRolesRepository from '../repositories/userRoles.repository.js';
+import specialtiesRepository from '../repositories/specialties.repository.js';
 
 const signUp = async ({
   name,
@@ -11,7 +12,7 @@ const signUp = async ({
   password,
   document,
   phone,
-  license_number,
+  licenseNumber,
   specialties,
 }: z.infer<typeof doctorSchemas.signUp>) => {
   const {
@@ -22,16 +23,22 @@ const signUp = async ({
 
   const {
     rows: [doctorRole],
-  } = await userRolesRepository.findByName('doctor');
+  } = await userRolesRepository.findBySlug({ slug: 'doctor' });
 
-  await doctorsRepository.create({
+  const { rows: dbSpecialties } = await specialtiesRepository.findBySlugs(
+    specialties.map((specialty) => specialty.slug)
+  );
+
+  for (let i = 0; i < specialties.length; i++) specialties[i].id = dbSpecialties[i].id;
+
+  doctorsRepository.create({
     name,
     roleId: doctorRole.id,
     email,
     password,
     document,
     phone,
-    license_number,
+    licenseNumber,
     specialties,
   });
 };

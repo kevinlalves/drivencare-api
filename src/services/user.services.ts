@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import userSchemas from '../schemas/user.schemas';
+import userSchemas from '../schemas/user.schemas.js';
 import usersRepository from '../repositories/users.repository.js';
 import errors from '../errors/index.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { jwtSecret, jwtTokenDuration } from '../utils/constants/jwt';
+import { jwtSecret, jwtTokenDuration } from '../utils/constants/jwt.js';
 
 const signIn = async ({ email, password }: z.infer<typeof userSchemas.signIn>) => {
   const {

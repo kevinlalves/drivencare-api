@@ -1,7 +1,7 @@
-type UserRole = {
+type Specialty = {
   id: string;
   name: string;
   slug: string;
 };
 
-export default UserRole;
+export default Specialty;
