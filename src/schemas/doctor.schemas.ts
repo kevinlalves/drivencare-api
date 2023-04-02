@@ -2,6 +2,20 @@ import { z } from 'zod';
 import userSchemas from './user.schemas.js';
 import { lowerCaseLettersUnderscores, validMedicalLicense } from '../utils/constants/regex.js';
 
+const findAll = z.object({
+  per: z.number().int().nonnegative().optional(),
+  page: z.number().int().positive().optional(),
+});
+
+const findByLicenseNumber = z.object({
+  licenseNumber: z.string().regex(validMedicalLicense),
+});
+
+const registerSpecialty = z.object({
+  specialtyId: z.string().uuid(),
+  monthsOfExperience: z.number().int().nonnegative(),
+});
+
 const signUp = z
   .object({
     licenseNumber: z.string().regex(validMedicalLicense),
@@ -18,4 +32,4 @@ const signUp = z
   })
   .merge(userSchemas.signUp);
 
-export default { signUp };
+export default { findAll, findByLicenseNumber, registerSpecialty, signUp };

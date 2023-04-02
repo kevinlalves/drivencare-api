@@ -9,11 +9,10 @@ import { jwtSecret, jwtTokenDuration } from '../utils/constants/jwt.js';
 const signIn = async ({ email, password }: z.infer<typeof userSchemas.signIn>) => {
   const {
     rows: [user],
-  } = await usersRepository.findByEmail(email);
-
+  } = await usersRepository.findByEmail({ email });
   if (!user) throw errors.invalidCredentialsError();
 
-  const isPasswordValid = await bcrypt.compare(user.password, password);
+  const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) throw errors.invalidCredentialsError();
 
   return jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: jwtTokenDuration });

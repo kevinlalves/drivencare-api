@@ -14,4 +14,12 @@ const signUp = z.object({
   phone: z.string().regex(validPhone),
 });
 
-export default { signIn, signUp };
+const findByEmail = z.object({
+  email: z.string().email(),
+});
+
+const findById = z.object({
+  id: z.string().uuid(),
+});
+
+export default { signIn, signUp, findByEmail, findById };

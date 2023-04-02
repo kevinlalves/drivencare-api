@@ -4,24 +4,80 @@ import usersRepository from './users.repository.js';
 import doctorSchemas from '../schemas/doctor.schemas.js';
 import { QueryResult } from 'pg';
 import Doctor from '../types/Doctor.js';
+import { standardUserBach } from '../utils/constants/queries.js';
 
-const findAll = (): Promise<QueryResult<Doctor>> =>
+const findAll = ({
+  page = 1,
+  per = standardUserBach,
+}: z.infer<typeof doctorSchemas.findAll>): Promise<QueryResult<Doctor>> =>
   db.query(
     `
-      SELECT * FROM doctors;
+      SELECT
+        doctors.id,
+        json_build_object(
+          'id', users.id,
+          'name', users.name,
+          'email', users.email,
+          'document', users.document,
+          'picture', users.picture,
+          'phone', users.phone,
+          'createdAt', users.created_at,
+          'updatedAt', users.updated_at
+        ) as "personalInfo",
+        doctors.license_number AS "licenseNumber",
+        AVG(appointments.rating) AS rating,
+        COALESCE(COUNT(appointments.id), 0) AS "appointmentsCount",
+        COALESCE(COUNT(appointments.review), 0) AS "reviewsCount",
+        json_agg(specialties.name) AS "specialties"
+      FROM doctors
+      JOIN users
+      ON doctors.user_id = users.id
+      JOIN doctor_specialties
+      ON doctors.id = doctor_specialties.doctor_id
+      LEFT JOIN weekly_schedules
+      ON doctor_specialties.id = weekly_schedules.doctor_specialty_id
+      LEFT JOIN appointments
+      ON weekly_schedules.id = appointments.weekly_schedule_id
+      JOIN specialties
+      ON specialties.id = doctor_specialties.specialty_id
+      GROUP BY doctors.id, users.id
+      OFFSET $1
+      LIMIT $2;
+    `,
+    [per * (page - 1), per]
+  );
+
+const findByLicenseNumber = ({ licenseNumber }: z.infer<typeof doctorSchemas.findByLicenseNumber>) =>
+  db.query(
     `
+      SELECT * FROM doctors WHERE license_number = $1
+    `,
+    [licenseNumber]
+  );
+
+const registerSpecialty = ({
+  specialtyId,
+  monthsOfExperience,
+  doctorId,
+}: z.infer<typeof doctorSchemas.registerSpecialty> & { doctorId: string }) =>
+  db.query(
+    `
+      INSERT INTO doctor_specialties (doctor_id, specialty_id, months_of_experience)
+      VALUES ($1, $2, $3);
+    `,
+    [doctorId, specialtyId, monthsOfExperience]
   );
 
 const create = async ({
   name,
-  roleId,
+  roleSlug,
   email,
   password,
   document,
   phone,
   licenseNumber,
   specialties,
-}: z.infer<typeof doctorSchemas.signUp> & { roleId: string }) => {
+}: z.infer<typeof doctorSchemas.signUp> & { roleSlug: string }) => {
   const dbClient = await db.connect();
 
   try {
@@ -29,7 +85,7 @@ const create = async ({
 
     const {
       rows: [{ userId }],
-    } = await usersRepository.create({ name, roleId, email, password, document, phone }, dbClient);
+    } = await usersRepository.create({ name, roleSlug, email, password, document, phone }, dbClient);
 
     const {
       rows: [{ doctorId }],
@@ -42,13 +98,19 @@ const create = async ({
       [userId, licenseNumber]
     )) as QueryResult<{ doctorId: string }>;
 
-    const doctorSpecialtiesValues = specialties.map(
-      (specialty) => `(${doctorId}${specialty.id}, ${specialty.monthsOfExperience})`
-    );
+    const doctorSpecialtiesValues = specialties.flatMap((specialty) => [
+      doctorId,
+      specialty.id,
+      specialty.monthsOfExperience,
+    ]);
+    const plaholders = specialties
+      .map((_, index) => `($${index * 3 + 1}, $${index * 3 + 2}, $${index * 3 + 3})`)
+      .join(', ');
+
     await dbClient.query(
       `
         INSERT INTO doctor_specialties (doctor_id, specialty_id, months_of_experience)
-        VALUES ${doctorSpecialtiesValues.join(', ')};
+        VALUES ${plaholders};
       `,
       doctorSpecialtiesValues
     );
@@ -62,4 +124,4 @@ const create = async ({
   }
 };
 
-export default { findAll, create };
+export default { findAll, findByLicenseNumber, registerSpecialty, create };
