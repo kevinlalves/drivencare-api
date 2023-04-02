@@ -22,4 +22,16 @@ const signIn = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { signIn };
+const findCurrent = async (req: Request, res: Response, next: NextFunction) => {
+  const { userId } = res.locals as { userId: string };
+
+  try {
+    const user = await userServices.findCurrent({ userId });
+
+    res.send(user);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { signIn, findCurrent };

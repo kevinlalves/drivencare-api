@@ -9,6 +9,11 @@ const findAll = z.object({
   page: z.number().int().positive().optional(),
 });
 
+const findAllAppointments = z.object({
+  per: z.number().int().nonnegative().optional(),
+  page: z.number().int().positive().optional(),
+});
+
 const findAllWeeklySchedules = z.object({
   per: z.number().int().nonnegative().optional(),
   page: z.number().int().positive().optional(),
@@ -48,6 +53,7 @@ const signUp = z
 
 export default {
   findAll,
+  findAllAppointments,
   findAllWeeklySchedules,
   findByLicenseNumber,
   registerSpecialty,

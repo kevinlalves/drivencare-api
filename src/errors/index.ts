@@ -8,7 +8,7 @@ const unprocessableEntityError = (message: string | string[]) => {
 const unauthorizedError = () => {
   return {
     name: 'UnauthorizedError',
-    message: 'You must be signed in to continue',
+    message: 'You do not have access permission',
   };
 };
 

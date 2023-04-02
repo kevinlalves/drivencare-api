@@ -13,6 +13,18 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findAllAppointments = async (req: Request, res: Response, next: NextFunction) => {
+  const { userId } = res.locals as { userId: string };
+
+  try {
+    const appointments = await patientServices.findAllAppointments({ userId });
+
+    res.send(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
   const {
     name,
@@ -47,4 +59,18 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { findAll, signUp };
+const createAppointment = async (req: Request, res: Response, next: NextFunction) => {
+  const { userId, weeklyScheduleId, date } = res.locals as z.infer<typeof patientSchemas.createAppointment> & {
+    userId: string;
+  };
+
+  try {
+    await patientServices.createAppointment({ userId, weeklyScheduleId, date });
+
+    res.sendStatus(201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { findAll, findAllAppointments, signUp, createAppointment };

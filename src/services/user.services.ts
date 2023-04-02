@@ -18,6 +18,14 @@ const signIn = async ({ email, password }: z.infer<typeof userSchemas.signIn>) =
   return jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: jwtTokenDuration });
 };
 
+const findCurrent = async ({ userId }: { userId: string }) => {
+  const {
+    rows: [user],
+  } = await usersRepository.findById({ id: userId });
+
+  return user;
+};
+
 const checkRoleAuthorization = async ({ userId, role }: { [key: string]: string }) => {
   const {
     rows: [{ roleSlug }],
@@ -26,4 +34,4 @@ const checkRoleAuthorization = async ({ userId, role }: { [key: string]: string 
   if (roleSlug !== role) throw errors.unauthorizedError();
 };
 
-export default { signIn, checkRoleAuthorization };
+export default { signIn, findCurrent, checkRoleAuthorization };

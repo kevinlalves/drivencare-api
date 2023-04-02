@@ -5,6 +5,7 @@ import usersRepository from './users.repository.js';
 import { standardUserBach } from '../utils/constants/queries.js';
 import { QueryResult } from 'pg';
 import Patient from '../types/Patient.js';
+import Appointment from '../types/Appointment.js';
 
 const findAll = ({
   per = standardUserBach,
@@ -43,6 +44,46 @@ const findAll = ({
       LIMIT $2;
     `,
     [per * (page - 1), per]
+  );
+
+const findAllAppointments = ({
+  userId,
+  per = standardUserBach,
+  page = 1,
+}: z.infer<typeof patientSchemas.findAllAppointments> & { userId: string }): Promise<QueryResult<Appointment>> =>
+  db.query(
+    `
+      SELECT
+        appointments.id,
+        users.name AS "doctorName",
+        specialties.name AS specialty,
+        weekly_schedules.day_of_week AS "dayOfWeek",
+        weekly_schedules.start_time AS "startTime",
+        weekly_schedules.end_time AS "endTime",
+        appointments.date,
+        appointments.status,
+        appointments.rating,
+        appointments.review,
+        appointments.created_at AS "createdAt",
+        appointments.finished_at AS "finishedAt"
+      FROM appointments
+      JOIN patients
+      ON patients.id = appointments.patient_id
+      JOIN weekly_schedules
+      ON weekly_schedules.id = appointments.weekly_schedule_id
+      JOIN doctor_specialties
+      ON doctor_specialties.id = weekly_schedules.doctor_specialty_id
+      JOIN specialties
+      ON specialties.id = doctor_specialties.specialty_id
+      JOIN doctors
+      ON doctors.id = doctor_specialties.doctor_id
+      JOIN users
+      ON doctors.user_id = users.id
+      WHERE patients.user_id = $1
+      OFFSET $2
+      LIMIT $3;
+    `,
+    [userId, per * (page - 1), per]
   );
 
 const create = async ({
@@ -85,4 +126,18 @@ const create = async ({
   }
 };
 
-export default { findAll, create };
+const createAppointment = async ({
+  patientId,
+  weeklyScheduleId,
+  date,
+}: z.infer<typeof patientSchemas.createAppointment> & { patientId: string }) =>
+  db.query(
+    `
+      INSERT INTO appointments
+      (patient_id, weekly_schedule_id, date)
+      VALUES ($1, $2, $3);
+    `,
+    [patientId, weeklyScheduleId, date]
+  );
+
+export default { findAll, findAllAppointments, create, createAppointment };

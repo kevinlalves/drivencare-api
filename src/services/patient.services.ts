@@ -5,11 +5,21 @@ import errors from '../errors/index.js';
 import bcrypt from 'bcrypt';
 import { saltRounds } from '../utils/constants/bcrypt.js';
 import patientsRepository from '../repositories/patients.repository.js';
+import userServices from './user.services.js';
+import appointmentsRepository from '../repositories/appointments.repository.js';
 
 const findAll = async ({}) => {
   const { rows: patients } = await patientsRepository.findAll({});
 
   return patients;
+};
+
+const findAllAppointments = async ({ userId }: { userId: string }) => {
+  await userServices.checkRoleAuthorization({ userId, role: 'patient' });
+
+  const { rows: appointments } = await patientsRepository.findAllAppointments({ userId });
+
+  return appointments;
 };
 
 const signUp = async ({
@@ -46,4 +56,22 @@ const signUp = async ({
   });
 };
 
-export default { findAll, signUp };
+const createAppointment = async ({
+  userId,
+  weeklyScheduleId,
+  date,
+}: z.infer<typeof patientSchemas.createAppointment> & { userId: string }) => {
+  const {
+    rows: [patient],
+  } = await usersRepository.findPatientId({ userId });
+  if (!patient) throw errors.unauthorizedError();
+
+  const {
+    rows: [appointment],
+  } = await appointmentsRepository.findByUniqueInfo({ weeklyScheduleId, date });
+  if (appointment) throw errors.conflictError('An appointment for the same timeslot already exists');
+
+  return patientsRepository.createAppointment({ patientId: patient.id, weeklyScheduleId, date });
+};
+
+export default { findAll, findAllAppointments, signUp, createAppointment };

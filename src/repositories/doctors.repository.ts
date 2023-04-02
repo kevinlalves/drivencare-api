@@ -6,6 +6,7 @@ import { QueryResult } from 'pg';
 import Doctor from '../types/Doctor.js';
 import { standardUserBach } from '../utils/constants/queries.js';
 import WeeklySchedule from '../types/WeeklySchedule.js';
+import Appointment from '../types/Appointment.js';
 
 const findAll = ({
   page = 1,
@@ -46,6 +47,57 @@ const findAll = ({
       LIMIT $2;
     `,
     [per * (page - 1), per]
+  );
+
+const findAllAppointments = ({
+  userId,
+  per = 1,
+  page = standardUserBach,
+}: z.infer<typeof doctorSchemas.findAllAppointments> & { userId: string }): Promise<QueryResult<Appointment>> =>
+  db.query(
+    `
+      SELECT
+        appointments.id,
+        json_build_object(
+          'id', patients.id,
+          'emergencyContactName', patients.emergency_contact_name,
+          'emergencyContactPhone', patients.emergency_contact_phone,
+          'insuranceProvider', patients.insurance_provider,
+          'insuranceNumber', patients.insurance_number,
+          'allergies', patients.allergies,
+          'updatedAt', patients.updated_at
+        ) AS patient,
+        json_build_object(
+          'id', weekly_schedules.id,
+          'specialty', specialties.name,
+          'dayOfWeek', weekly_schedules.day_of_week,
+          'startTime', weekly_schedules.start_time,
+          'endTime', weekly_schedules.end_time
+        ) AS "weeklySchedule",
+        appointments.date,
+        appointments.status,
+        appointments.rating,
+        appointments.review,
+        appointments.created_at AS "createdAt",
+        appointments.finished_at AS "finishedAt"
+      FROM appointments
+      JOIN patients
+      ON patients.id = appointments.patient_id
+      JOIN weekly_schedules
+      ON weekly_schedules.id = appointments.weekly_schedule_id
+      JOIN doctor_specialties
+      ON doctor_specialties.id = weekly_schedules.doctor_specialty_id
+      JOIN specialties
+      ON specialties.id = doctor_specialties.specialty_id
+      JOIN doctors
+      ON doctors.id = doctor_specialties.doctor_id
+      JOIN users
+      ON users.id = doctors.user_id
+      WHERE users.id = $1
+      OFFSET $2
+      LIMIT $3;
+    `,
+    [userId, per * (page - 1), per]
   );
 
 const findAllWeeklySchedules = ({
@@ -175,6 +227,7 @@ const create = async ({
 
 export default {
   findAll,
+  findAllAppointments,
   findAllWeeklySchedules,
   findByLicenseNumber,
   registerSpecialty,

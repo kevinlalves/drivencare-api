@@ -3,6 +3,7 @@ import db from '../config/database/connection.js';
 import userSchemas from '../schemas/user.schemas.js';
 import { PoolClient, QueryResult } from 'pg';
 import User from '../types/User.js';
+import { standardUserBach } from '../utils/constants/queries.js';
 
 const findAll = (): Promise<QueryResult<User>> =>
   db.query(
@@ -49,7 +50,6 @@ const findById = ({ id }: z.infer<typeof userSchemas.findById>): Promise<QueryRe
         id,
         name,
         email,
-        password,
         document,
         created_at AS "createdAt",
         updated_at AS "updatedAt",
@@ -70,6 +70,19 @@ const findDoctorId = ({ userId }: { userId: string }): Promise<QueryResult<{ doc
       FROM doctors
       JOIN users
       ON users.id = doctors.user_id
+      WHERE users.id = $1;
+    `,
+    [userId]
+  );
+
+const findPatientId = ({ userId }: { userId: string }): Promise<QueryResult<{ id: string }>> =>
+  db.query(
+    `
+      SELECT
+        patients.id
+      FROM patients
+      JOIN users
+      ON users.id = patients.user_id
       WHERE users.id = $1;
     `,
     [userId]
@@ -111,4 +124,13 @@ const create = (
     [name, roleSlug, email, password, document, phone]
   );
 
-export default { findAll, findById, findByEmail, findByUniqueInfo, findDoctorId, findDoctorSpecialtyId, create };
+export default {
+  findAll,
+  findById,
+  findByEmail,
+  findByUniqueInfo,
+  findDoctorId,
+  findPatientId,
+  findDoctorSpecialtyId,
+  create,
+};
