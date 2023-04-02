@@ -15,6 +15,12 @@ doctorRoutes.post(
   doctorsController.registerSpecialty
 );
 doctorRoutes.get(
+  '/appointments',
+  validateSchemaMiddleware(doctorSchemas.findAllAppointments),
+  authMiddleware,
+  doctorsController.findAllAppointments
+);
+doctorRoutes.get(
   '/weekly_schedules',
   validateSchemaMiddleware(doctorSchemas.findAllWeeklySchedules),
   authMiddleware,

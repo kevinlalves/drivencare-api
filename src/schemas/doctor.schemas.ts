@@ -3,6 +3,7 @@ import userSchemas from './user.schemas.js';
 import { lowerCaseLettersUnderscores, timeRegex, validMedicalLicense } from '../utils/constants/regex.js';
 import { week_day } from '../utils/constants/enums.js';
 import { invalidTimeFormat } from '../utils/constants/errors.js';
+import validateTimeIntervalConsistency from '../utils/functions/validateTimeInvervalConsistency.js';
 
 const findAll = z.object({
   per: z.number().int().nonnegative().optional(),
@@ -28,12 +29,17 @@ const registerSpecialty = z.object({
   monthsOfExperience: z.number().int().nonnegative(),
 });
 
-const createWeeklySchedule = z.object({
-  specialtyId: z.string().uuid(),
-  dayOfWeek: z.enum(week_day),
-  startTime: z.string().refine((time) => timeRegex.test(time), invalidTimeFormat),
-  endTime: z.string().refine((time) => timeRegex.test(time), invalidTimeFormat),
-});
+const createWeeklySchedule = z
+  .object({
+    specialtyId: z.string().uuid(),
+    dayOfWeek: z.enum(week_day),
+    startTime: z.string().refine((time) => timeRegex.test(time), invalidTimeFormat),
+    endTime: z.string().refine((time) => timeRegex.test(time), invalidTimeFormat),
+  })
+  .refine(validateTimeIntervalConsistency, {
+    message: 'greater than startTime',
+    path: ['endTime'],
+  });
 
 const signUp = z
   .object({

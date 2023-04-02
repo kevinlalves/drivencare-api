@@ -13,6 +13,18 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findAllAppointments = async (req: Request, res: Response, next: NextFunction) => {
+  const { userId } = res.locals as { userId: string };
+
+  try {
+    const appointments = await doctorServices.findAllAppointments({ userId });
+
+    res.send(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const findAllWeeklySchedules = async (req: Request, res: Response, next: NextFunction) => {
   const { userId } = res.locals as { userId: string };
 
@@ -67,4 +79,11 @@ const singUp = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { findAll, findAllWeeklySchedules, registerSpecialty, createWeeklySchedule, singUp };
+export default {
+  findAll,
+  findAllAppointments,
+  findAllWeeklySchedules,
+  registerSpecialty,
+  createWeeklySchedule,
+  singUp,
+};

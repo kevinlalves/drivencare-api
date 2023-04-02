@@ -14,6 +14,18 @@ const findAll = async ({ per, page }: z.infer<typeof doctorSchemas.findAll>) => 
   return doctors;
 };
 
+const findAllAppointments = async ({
+  userId,
+  per,
+  page,
+}: z.infer<typeof doctorSchemas.findAllAppointments> & { userId: string }) => {
+  await userServices.checkRoleAuthorization({ userId, role: 'doctor' });
+
+  const { rows: appointments } = await doctorsRepository.findAllAppointments({ userId });
+
+  return appointments;
+};
+
 const findAllWeeklySchedules = async ({
   userId,
   per,
@@ -60,8 +72,15 @@ const createWeeklySchedule = async ({
   const {
     rows: [doctorSpecialty],
   } = await usersRepository.findDoctorSpecialtyId({ userId, specialtyId });
-
   if (!doctorSpecialty) throw errors.notFoundError('This specialty does not exists or belongs to the doctor');
+
+  const { rowCount } = await doctorsRepository.findOverlappingSchedules({
+    doctorSpecialtyId: doctorSpecialty.id,
+    dayOfWeek,
+    startTime,
+    endTime,
+  });
+  if (rowCount) throw errors.conflictError('The time interval overlaps with an existing one');
 
   return doctorsRepository.createWeeklySchedule({
     doctorSpecialtyId: doctorSpecialty.id,
@@ -110,4 +129,11 @@ const signUp = async ({
   });
 };
 
-export default { findAll, findAllWeeklySchedules, registerSpecialty, createWeeklySchedule, signUp };
+export default {
+  findAll,
+  findAllAppointments,
+  findAllWeeklySchedules,
+  registerSpecialty,
+  createWeeklySchedule,
+  signUp,
+};

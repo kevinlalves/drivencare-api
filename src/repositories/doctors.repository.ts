@@ -51,29 +51,26 @@ const findAll = ({
 
 const findAllAppointments = ({
   userId,
-  per = 1,
-  page = standardUserBach,
+  per = standardUserBach,
+  page = 1,
 }: z.infer<typeof doctorSchemas.findAllAppointments> & { userId: string }): Promise<QueryResult<Appointment>> =>
   db.query(
     `
       SELECT
         appointments.id,
         json_build_object(
-          'id', patients.id,
+          'name', users.name,
           'emergencyContactName', patients.emergency_contact_name,
           'emergencyContactPhone', patients.emergency_contact_phone,
           'insuranceProvider', patients.insurance_provider,
           'insuranceNumber', patients.insurance_number,
           'allergies', patients.allergies,
           'updatedAt', patients.updated_at
-        ) AS patient,
-        json_build_object(
-          'id', weekly_schedules.id,
-          'specialty', specialties.name,
-          'dayOfWeek', weekly_schedules.day_of_week,
-          'startTime', weekly_schedules.start_time,
-          'endTime', weekly_schedules.end_time
-        ) AS "weeklySchedule",
+        ) AS "patientInfo",
+        specialties.name AS specialty,
+        weekly_schedules.day_of_week AS "dayOfWeek",
+        weekly_schedules.start_time AS "startTime",
+        weekly_schedules.end_time AS "endTime",
         appointments.date,
         appointments.status,
         appointments.rating,
@@ -92,12 +89,33 @@ const findAllAppointments = ({
       JOIN doctors
       ON doctors.id = doctor_specialties.doctor_id
       JOIN users
-      ON users.id = doctors.user_id
-      WHERE users.id = $1
+      ON patients.user_id = users.id
+      WHERE doctors.user_id = $1
       OFFSET $2
       LIMIT $3;
     `,
     [userId, per * (page - 1), per]
+  );
+
+const findOverlappingSchedules = ({
+  doctorSpecialtyId,
+  startTime,
+  endTime,
+  dayOfWeek,
+}: Omit<z.infer<typeof doctorSchemas.createWeeklySchedule>, 'specialtyId'> & { doctorSpecialtyId: string }) =>
+  db.query(
+    `
+      SELECT 1
+      FROM weekly_schedules
+      WHERE doctor_specialty_id = $1
+      AND day_of_week = $2
+      AND NOT (
+        start_time > $3 OR
+        end_time < $4
+      )
+      LIMIT 1;
+    `,
+    [doctorSpecialtyId, dayOfWeek, endTime, startTime]
   );
 
 const findAllWeeklySchedules = ({
@@ -136,7 +154,7 @@ const findAllWeeklySchedules = ({
 const findByLicenseNumber = ({ licenseNumber }: z.infer<typeof doctorSchemas.findByLicenseNumber>) =>
   db.query(
     `
-      SELECT * FROM doctors WHERE license_number = $1
+      SELECT * FROM doctors WHERE license_number = $1 LIMIT 1;
     `,
     [licenseNumber]
   );
@@ -227,6 +245,7 @@ const create = async ({
 
 export default {
   findAll,
+  findOverlappingSchedules,
   findAllAppointments,
   findAllWeeklySchedules,
   findByLicenseNumber,
