@@ -5,6 +5,7 @@ import doctorSchemas from '../schemas/doctor.schemas.js';
 import { QueryResult } from 'pg';
 import Doctor from '../types/Doctor.js';
 import { standardUserBach } from '../utils/constants/queries.js';
+import WeeklySchedule from '../types/WeeklySchedule.js';
 
 const findAll = ({
   page = 1,
@@ -47,6 +48,39 @@ const findAll = ({
     [per * (page - 1), per]
   );
 
+const findAllWeeklySchedules = ({
+  userId,
+  per = standardUserBach,
+  page = 1,
+}: z.infer<typeof doctorSchemas.findAllWeeklySchedules> & { userId: string }): Promise<QueryResult<WeeklySchedule>> =>
+  db.query(
+    `
+      SELECT
+        weekly_schedules.id,
+        json_build_object(
+          'id', specialties.id,
+          'name', specialties.name,
+          'slug', specialties.slug
+        ) AS specialty,
+        weekly_schedules.day_of_week AS "dayOfWeek",
+        weekly_schedules.start_time AS "startTime",
+        weekly_schedules.end_time AS "endTime"
+        FROM weekly_schedules
+        JOIN doctor_specialties
+        ON doctor_specialties.id = weekly_schedules.doctor_specialty_id
+        JOIN specialties
+        ON specialties.id = doctor_specialties.specialty_id
+        JOIN doctors
+        ON doctors.id = doctor_specialties.doctor_id
+        JOIN users
+        ON users.id = doctors.user_id
+        WHERE users.id = $1
+        OFFSET $2
+        LIMIT $3;
+    `,
+    [userId, per * (page - 1), per]
+  );
+
 const findByLicenseNumber = ({ licenseNumber }: z.infer<typeof doctorSchemas.findByLicenseNumber>) =>
   db.query(
     `
@@ -66,6 +100,21 @@ const registerSpecialty = ({
       VALUES ($1, $2, $3);
     `,
     [doctorId, specialtyId, monthsOfExperience]
+  );
+
+const createWeeklySchedule = ({
+  doctorSpecialtyId,
+  dayOfWeek,
+  startTime,
+  endTime,
+}: Omit<z.infer<typeof doctorSchemas.createWeeklySchedule>, 'specialtyId'> & { doctorSpecialtyId: string }) =>
+  db.query(
+    `
+      INSERT INTO weekly_schedules
+      (doctor_specialty_id, day_of_week, start_time, end_time)
+      VALUES ($1, $2, to_timestamp($3, 'HH24:MI')::timetz, to_timestamp($4, 'HH24:MI')::timetz);
+    `,
+    [doctorSpecialtyId, dayOfWeek, startTime, endTime]
   );
 
 const create = async ({
@@ -124,4 +173,11 @@ const create = async ({
   }
 };
 
-export default { findAll, findByLicenseNumber, registerSpecialty, create };
+export default {
+  findAll,
+  findAllWeeklySchedules,
+  findByLicenseNumber,
+  registerSpecialty,
+  createWeeklySchedule,
+  create,
+};

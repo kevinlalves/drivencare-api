@@ -75,6 +75,28 @@ const findDoctorId = ({ userId }: { userId: string }): Promise<QueryResult<{ doc
     [userId]
   );
 
+const findDoctorSpecialtyId = ({
+  userId,
+  specialtyId,
+}: {
+  userId: string;
+  specialtyId: string;
+}): Promise<QueryResult<{ id: string }>> =>
+  db.query(
+    `
+      SELECT
+        doctor_specialties.id
+      FROM doctor_specialties
+      JOIN doctors
+      ON doctor_specialties.doctor_id = doctors.id
+      JOIN users
+      ON doctors.user_id = users.id
+      WHERE users.id = $1
+      AND doctor_specialties.specialty_id = $2;
+    `,
+    [userId, specialtyId]
+  );
+
 const create = (
   { name, roleSlug, email, password, document, phone }: z.infer<typeof userSchemas.signUp> & { roleSlug: string },
   dbClient: PoolClient
@@ -89,4 +111,4 @@ const create = (
     [name, roleSlug, email, password, document, phone]
   );
 
-export default { findAll, findById, findByEmail, findByUniqueInfo, findDoctorId, create };
+export default { findAll, findById, findByEmail, findByUniqueInfo, findDoctorId, findDoctorSpecialtyId, create };

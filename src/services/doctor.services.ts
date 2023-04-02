@@ -6,11 +6,24 @@ import doctorsRepository from '../repositories/doctors.repository.js';
 import specialtiesRepository from '../repositories/specialties.repository.js';
 import bcrypt from 'bcrypt';
 import { saltRounds } from '../utils/constants/bcrypt.js';
+import userServices from './user.services.js';
 
 const findAll = async ({ per, page }: z.infer<typeof doctorSchemas.findAll>) => {
   const { rows: doctors } = await doctorsRepository.findAll({});
 
   return doctors;
+};
+
+const findAllWeeklySchedules = async ({
+  userId,
+  per,
+  page,
+}: z.infer<typeof doctorSchemas.findAllWeeklySchedules> & { userId: string }) => {
+  await userServices.checkRoleAuthorization({ userId, role: 'doctor' });
+
+  const { rows: weeklySchedules } = await doctorsRepository.findAllWeeklySchedules({ userId });
+
+  return weeklySchedules;
 };
 
 const findByLicenseNumber = async ({ licenseNumber }: z.infer<typeof doctorSchemas.findByLicenseNumber>) => {
@@ -26,17 +39,36 @@ const registerSpecialty = async ({
   monthsOfExperience,
   userId,
 }: z.infer<typeof doctorSchemas.registerSpecialty> & { userId: string }) => {
-  const {
-    rows: [{ roleSlug }],
-  } = await usersRepository.findById({ id: userId });
-  console.log(roleSlug);
-  if (roleSlug !== 'doctor') throw errors.unauthorizedError();
+  await userServices.checkRoleAuthorization({ userId, role: 'doctor' });
 
   const {
     rows: [{ doctorId }],
   } = await usersRepository.findDoctorId({ userId });
 
   return doctorsRepository.registerSpecialty({ doctorId, specialtyId, monthsOfExperience });
+};
+
+const createWeeklySchedule = async ({
+  userId,
+  specialtyId,
+  dayOfWeek,
+  startTime,
+  endTime,
+}: z.infer<typeof doctorSchemas.createWeeklySchedule> & { userId: string }) => {
+  await userServices.checkRoleAuthorization({ userId, role: 'doctor' });
+
+  const {
+    rows: [doctorSpecialty],
+  } = await usersRepository.findDoctorSpecialtyId({ userId, specialtyId });
+
+  if (!doctorSpecialty) throw errors.notFoundError('This specialty does not exists or belongs to the doctor');
+
+  return doctorsRepository.createWeeklySchedule({
+    doctorSpecialtyId: doctorSpecialty.id,
+    dayOfWeek,
+    startTime,
+    endTime,
+  });
 };
 
 const signUp = async ({
@@ -78,4 +110,4 @@ const signUp = async ({
   });
 };
 
-export default { findAll, registerSpecialty, signUp };
+export default { findAll, findAllWeeklySchedules, registerSpecialty, createWeeklySchedule, signUp };

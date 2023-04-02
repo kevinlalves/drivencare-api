@@ -7,5 +7,7 @@ const patientRoutes = Router();
 
 patientRoutes.get('/', validateSchemaMiddleware(patientSchemas.findAll), patientsController.findAll);
 patientRoutes.post('/sign_up', validateSchemaMiddleware(patientSchemas.signUp), patientsController.signUp);
+// patientRoutes.get('/appointments', validateSchemaMiddleware(patientSchemas), patientsController);
+// patientRoutes.post('/appointments', validateSchemaMiddleware(patientSchemas), patientsController);
 
 export default patientRoutes;

@@ -13,6 +13,18 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findAllWeeklySchedules = async (req: Request, res: Response, next: NextFunction) => {
+  const { userId } = res.locals as { userId: string };
+
+  try {
+    const weeklySchedules = await doctorServices.findAllWeeklySchedules({ userId });
+
+    res.send(weeklySchedules);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const registerSpecialty = async (req: Request, res: Response, next: NextFunction) => {
   const { userId, specialtyId, monthsOfExperience } = res.locals as z.infer<typeof doctorSchemas.registerSpecialty> & {
     userId: string;
@@ -20,6 +32,20 @@ const registerSpecialty = async (req: Request, res: Response, next: NextFunction
 
   try {
     await doctorServices.registerSpecialty({ userId, specialtyId, monthsOfExperience });
+
+    res.sendStatus(201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const createWeeklySchedule = async (req: Request, res: Response, next: NextFunction) => {
+  const { userId, specialtyId, dayOfWeek, startTime, endTime } = res.locals as z.infer<
+    typeof doctorSchemas.createWeeklySchedule
+  > & { userId: string };
+
+  try {
+    await doctorServices.createWeeklySchedule({ userId, specialtyId, dayOfWeek, startTime, endTime });
 
     res.sendStatus(201);
   } catch (err) {
@@ -41,4 +67,4 @@ const singUp = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { findAll, registerSpecialty, singUp };
+export default { findAll, findAllWeeklySchedules, registerSpecialty, createWeeklySchedule, singUp };
