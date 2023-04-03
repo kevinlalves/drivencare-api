@@ -1,36 +1,15 @@
-const unprocessableEntityError = (message: string | string[]) => {
-  return {
-    name: 'UnprocessableEntityError',
-    message,
-  };
+const errorFactory = (name: string, message: string | Array<string>) => {
+  return { name, message };
 };
 
-const unauthorizedError = () => {
-  return {
-    name: 'UnauthorizedError',
-    message: 'You do not have access permission',
-  };
-};
+const unprocessableEntityError = (message: string | Array<string>) => errorFactory('UnprocessableEntityError', message);
 
-const invalidCredentialsError = () => {
-  return {
-    name: 'InvalidCredentialsError',
-    message: 'Invalid email and/or password',
-  };
-};
+const unauthorizedError = () => errorFactory('UnauthorizedError', 'You do not have access permission');
 
-const conflictError = (message: string) => {
-  return {
-    name: 'ConflictError',
-    message,
-  };
-};
+const invalidCredentialsError = () => errorFactory('InvalidCredentialsError', 'Invalid email and/or password');
 
-const notFoundError = (message: string) => {
-  return {
-    name: 'NotFoundError',
-    message,
-  };
-};
+const conflictError = (message: string) => errorFactory('ConflictError', message);
+
+const notFoundError = (message: string) => errorFactory('NotFoundError', message);
 
 export default { unprocessableEntityError, unauthorizedError, invalidCredentialsError, conflictError, notFoundError };
