@@ -7,6 +7,7 @@ import specialtiesRepository from '../repositories/specialties.repository.js';
 import bcrypt from 'bcrypt';
 import { saltRounds } from '../utils/constants/bcrypt.js';
 import userServices from './user.services.js';
+import { format, getDay, parse } from 'date-fns';
 
 const findAll = async ({ per, page }: z.infer<typeof doctorSchemas.findAll>) => {
   const { rows: doctors } = await doctorsRepository.findAll({});
@@ -44,6 +45,24 @@ const findByLicenseNumber = async ({ licenseNumber }: z.infer<typeof doctorSchem
   } = await doctorsRepository.findByLicenseNumber({ licenseNumber });
 
   return doctor;
+};
+
+const findAvailableTimesByDate = async ({
+  doctorId,
+  specialtyId,
+  date,
+}: z.infer<typeof doctorSchemas.findAvailableTimesByDate>) => {
+  const parsedDate = parse(date, 'yyyy-MM-dd', new Date());
+  const dayOfWeek = format(parsedDate, 'EEEE').toLowerCase();
+
+  const { rows: openTimeslots } = await doctorsRepository.findAvailableTimesByDate({
+    doctorId,
+    specialtyId,
+    date,
+    dayOfWeek,
+  });
+
+  return openTimeslots;
 };
 
 const registerSpecialty = async ({
@@ -132,6 +151,7 @@ const signUp = async ({
 export default {
   findAll,
   findAllAppointments,
+  findAvailableTimesByDate,
   findAllWeeklySchedules,
   registerSpecialty,
   createWeeklySchedule,

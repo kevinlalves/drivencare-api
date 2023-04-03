@@ -15,6 +15,11 @@ doctorRoutes.post(
   doctorsController.registerSpecialty
 );
 doctorRoutes.get(
+  '/:doctorId/specialties/:specialtyId/available_times',
+  validateSchemaMiddleware(doctorSchemas.findAvailableTimesByDate),
+  doctorsController.findAvailableTimesByDate
+);
+doctorRoutes.get(
   '/appointments',
   validateSchemaMiddleware(doctorSchemas.findAllAppointments),
   authMiddleware,
@@ -32,11 +37,5 @@ doctorRoutes.post(
   authMiddleware,
   doctorsController.createWeeklySchedule
 );
-// doctorRoutes.post(
-//   '/specialties/:specialtyId/weekly_schedules/:weeklyScheduleId/schedule_exceptions',
-//   validateSchemaMiddleware(doctorSchemas),
-//   authMiddleware,
-//   doctorsController
-// );
 
 export default doctorRoutes;

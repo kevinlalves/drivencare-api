@@ -25,6 +25,18 @@ const findAllAppointments = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
+const findAvailableTimesByDate = async (req: Request, res: Response, next: NextFunction) => {
+  const { doctorId, specialtyId, date } = res.locals as z.infer<typeof doctorSchemas.findAvailableTimesByDate>;
+
+  try {
+    const openTimeslots = await doctorServices.findAvailableTimesByDate({ doctorId, specialtyId, date });
+
+    res.send(openTimeslots);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const findAllWeeklySchedules = async (req: Request, res: Response, next: NextFunction) => {
   const { userId } = res.locals as { userId: string };
 
@@ -82,6 +94,7 @@ const singUp = async (req: Request, res: Response, next: NextFunction) => {
 export default {
   findAll,
   findAllAppointments,
+  findAvailableTimesByDate,
   findAllWeeklySchedules,
   registerSpecialty,
   createWeeklySchedule,

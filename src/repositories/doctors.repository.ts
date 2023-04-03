@@ -118,6 +118,35 @@ const findOverlappingSchedules = ({
     [doctorSpecialtyId, dayOfWeek, endTime, startTime]
   );
 
+const findAvailableTimesByDate = ({
+  doctorId,
+  specialtyId,
+  date,
+  dayOfWeek,
+}: z.infer<typeof doctorSchemas.findAvailableTimesByDate> & { dayOfWeek: string }) =>
+  db.query(
+    `
+      SELECT
+        json_build_object(
+          'startTime', weekly_schedules.start_time,
+          'endTime', weekly_schedules.end_time
+        ) AS "openTimeslots"
+      FROM weekly_schedules
+      JOIN doctor_specialties
+      ON weekly_schedules.doctor_specialty_id = doctor_specialties.id
+      WHERE doctor_specialties.doctor_id = $1
+      AND doctor_specialties.specialty_id = $2
+      AND weekly_schedules.day_of_week = $3
+      AND NOT EXISTS (
+        SELECT 1
+        FROM appointments
+        WHERE appointments.weekly_schedule_id = weekly_schedules.id
+        AND appointments.date = $4
+      );
+    `,
+    [doctorId, specialtyId, dayOfWeek, date]
+  );
+
 const findAllWeeklySchedules = ({
   userId,
   per = standardUserBach,
@@ -247,6 +276,7 @@ export default {
   findAll,
   findOverlappingSchedules,
   findAllAppointments,
+  findAvailableTimesByDate,
   findAllWeeklySchedules,
   findByLicenseNumber,
   registerSpecialty,

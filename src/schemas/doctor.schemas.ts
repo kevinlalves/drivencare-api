@@ -4,6 +4,7 @@ import { lowerCaseLettersUnderscores, timeRegex, validMedicalLicense } from '../
 import { week_day } from '../utils/constants/enums.js';
 import { invalidTimeFormat } from '../utils/constants/errors.js';
 import validateTimeIntervalConsistency from '../utils/functions/validateTimeInvervalConsistency.js';
+import validateDateString from '../utils/functions/validateDateString.js';
 
 const findAll = z.object({
   per: z.number().int().nonnegative().optional(),
@@ -13,6 +14,12 @@ const findAll = z.object({
 const findAllAppointments = z.object({
   per: z.number().int().nonnegative().optional(),
   page: z.number().int().positive().optional(),
+});
+
+const findAvailableTimesByDate = z.object({
+  doctorId: z.string().uuid(),
+  specialtyId: z.string().uuid(),
+  date: z.string().refine(validateDateString, 'in invalid format: expected yyyy-MM-dd'),
 });
 
 const findAllWeeklySchedules = z.object({
@@ -60,6 +67,7 @@ const signUp = z
 export default {
   findAll,
   findAllAppointments,
+  findAvailableTimesByDate,
   findAllWeeklySchedules,
   findByLicenseNumber,
   registerSpecialty,
