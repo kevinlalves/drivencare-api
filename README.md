@@ -4,7 +4,7 @@ Api for platform where doctors and patients can sing up to offer and schedule ap
 
 # Dependencies
 
-`docker, '^23.0.2'`
+`docker, '^23.0.2'` \
 `docker compose, '^2.17.2'`
 
 # How to run
