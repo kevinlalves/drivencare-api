@@ -1,7 +1,28 @@
-# Project: drivencare-api
-# 📁 Collection: doctors 
+# About
 
-## 📁 Collection: weekly_schedules 
+Api for platform where doctors and patients can sing up to offer and schedule appointments.
+
+# Dependencies
+
+`docker, '^23.0.2'`
+`docker compose, '^2.17.2'`
+
+# How to run
+
+`docker compose up -d app`  (running on localhost:3001, define on the docker-compose file)
+
+### check stdout
+
+`docker attach {{your_folder_name}}-app-1`
+
+### access stdin of container
+
+`docker compose exec app bash`
+
+# drivencare-api documentation
+# 📁 Collection: doctors
+
+## 📁 Collection: weekly_schedules
 
 
 ## End-point: create
@@ -104,7 +125,7 @@
 >```
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
-# 📁 Collection: user_roles 
+# 📁 Collection: user_roles
 
 
 ## End-point: show
@@ -139,7 +160,7 @@
 
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
-# 📁 Collection: specialties 
+# 📁 Collection: specialties
 
 
 ## End-point: index
@@ -174,7 +195,7 @@
 
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
-# 📁 Collection: users 
+# 📁 Collection: users
 
 
 ## End-point: sign-in
@@ -201,7 +222,7 @@
 >```
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
-# 📁 Collection: patients 
+# 📁 Collection: patients
 
 
 ## End-point: create
